@@ -35,10 +35,13 @@ public class ArvoreB {
     	else {inserirRec(raiz,chave);}}
     public void inserirRec(Pagina PagAtual, int chave)
     	{int i;
-    	 for (i = 0; (i < ordem) && (PagAtual.nodos[i] != null)  && (chave > PagAtual.nodos[i].chave); i++){}
+    	 for (i = 0; (i < ordem) && (PagAtual.nodos[i] != null)  
+    			 && (chave > PagAtual.nodos[i].chave); i++){}
+    	//"i" indica o lugar onde nosso Nodo deve ficar
     	 Pagina ProxPag=(i==0)?PagAtual.nodos[0].esq:PagAtual.nodos[i-1].dir;
+    	//"ProxPag" é a página onde o buscaremos
     	 if (ProxPag==null) 
-    	 	{PagAtual.inserir(chave);
+    	 	{PagAtual.inserir(chave); //Aqui chamamos o método da classe Pagina
     	 	 quebrarVetor(PagAtual);}
     	 else {inserirRec(ProxPag,chave);}
     	 }
@@ -53,7 +56,7 @@ public class ArvoreB {
 		 	 pag.pai.nodos[0]= new Nodo(nodoSubindo.chave);
 		 	 this.raiz=pag.pai;}
 		 else {j = pag.pai.inserir(nodoSubindo.chave);}
-		 //pag.pai.nodos[j] é o X
+		 //pag.pai.nodos[j] é o nodo que subiu
 
 		 Nodo[] esq = new Nodo[2*ordem];
 		 for (int i=0;i<ordem/2;i++) {esq[i]=pag.nodos[i];}
@@ -68,7 +71,6 @@ public class ArvoreB {
 		 for (int i = 0; (i < ordem) && (pag.pai.nodos[i] != null); i++)
 		 	{if (pag.pai.nodos[i].esq==pag) {pag.pai.nodos[i].esq=pag.pai.nodos[j].dir;}
 		 	 if (pag.pai.nodos[i].dir==pag) {pag.pai.nodos[i].dir=pag.pai.nodos[j].esq;}}
-		 //if (pag.pai!=null) {quebrarVetor(pag.pai);}
 		 quebrarVetor(pag.pai);
 		 pag=null;
 		}
@@ -80,7 +82,9 @@ public class ArvoreB {
     	 System.out.println();}
     
     public void imprimir()
-    	{if (raiz!=null) {System.out.println("ÁRVORE:"); imprimirRec(raiz);} else {System.out.println("raiz é nula");}}
+    	{if (raiz!=null) {System.out.println("ÁRVORE:"); imprimirRec(raiz);} 
+    	 else {System.out.println("raiz é nula");}
+    	}
     public void imprimirRec(Pagina PagAtual)
     	{ImprimirPagina(PagAtual);
     	 if ((PagAtual.nodos[0]!=null)&&(PagAtual.nodos[0].esq!=null)) 
@@ -96,7 +100,8 @@ public void buscar(int chave)
 private Pagina buscarRec(Pagina PagAtual, int chave) 
 	{if ((PagAtual == null)||(PagAtual.nodos[0] == null)) {return null;}
 	 int i;
-	 for (i=0; (i < ordem) && (PagAtual.nodos[i] != null)  && (chave > PagAtual.nodos[i].chave); i++){}
+	 for (i=0; (i < ordem) && (PagAtual.nodos[i] != null)  
+			 && (chave > PagAtual.nodos[i].chave); i++){}
 	 if ((PagAtual.nodos[i]!=null)&&PagAtual.nodos[i].chave==chave) {return PagAtual;}
 	 return buscarRec((i==0)?PagAtual.nodos[0].esq:PagAtual.nodos[i-1].dir, chave);
 	 }
@@ -143,7 +148,7 @@ private boolean removerCaso1(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 	 if (j!=0) 
 	 	{if (i!=0) {PagAtual.nodos[i-1].dir=filhos;}
 	 	 if (PagAtual.nodos[i+1]!=null) {PagAtual.nodos[i+1].esq=filhos;}}
-	//Apagando o "i" e ajeitando o vetor:
+	//Apagando o "i" e organizando os demais elementos do vetor:
 	for (j=i; j<ordem; j++) 
 		{PagAtual.nodos[j]=PagAtual.nodos[j+1];}
 	quebrarVetor(filhos);
@@ -151,10 +156,10 @@ private boolean removerCaso1(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 
 private boolean removerCaso2(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 	{System.out.println("Caso 2: "+chave);
-	 Nodo sucessor = encontrarSucessor(PagAtual.nodos[i].dir);
+	 Nodo sucessor = encontrarSucessor(NodoAtual.dir);
 	 NodoAtual.chave = sucessor.chave;
-	 //Vamos remover sem passar pela função, porque ela tá repetida agora.
-	 
+	 //Removendo o sucessor
+	 removerRec(NodoAtual.dir, sucessor.chave);
 	 return true;}
 
 private boolean removerCaso3(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
@@ -166,7 +171,7 @@ private boolean removerCaso3(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 		 int k; //PagAtual.pai.nodos[k] guarda o nodo que tem como filho a PagAtual
 		 for (k=0; (k<ordem) && (PagAtual.pai.nodos[k]!=null);k++)
 	 	 	{if (PagAtual.pai.nodos[k].dir==PagAtual)
-	 	 		{//Tem irmã à esquerda que pode doar
+	 	 		{//A página tem irmã à esquerda que pode doar elementos
 	 	 		 irma=PagAtual.pai.nodos[k].esq;
 	 	 		 if (sizeNotNull(irma)>ordem/2) 
 	 	 		 	{for (int j = ordem; j >= 0; j--) 
@@ -178,7 +183,8 @@ private boolean removerCaso3(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 	 	 	 		 {//tem irmã à direita que pode doar
 	 	 		 	  irma=PagAtual.pai.nodos[k].dir;
 	 	 		 	  if (sizeNotNull(irma)>ordem/2) 
-	 	 		 	  	{doadoChave=irma.nodos[0].chave;} //primeiro elemento da direita será doado
+	 	 		 	  	{doadoChave=irma.nodos[0].chave;} 
+	 	 		 	  //O primeiro elemento da direita será doado
 	 	 		 	  break;}}
 		 	if (doadoChave!=null) 
 		 		{System.out.println("Há doadores!");
@@ -206,7 +212,8 @@ private boolean removerCaso3(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 		 		  quebrarVetor(PagAtual.pai);
 		 		  //avô: PagAtual.pai.pai
 		 		  if (PagAtual.pai.pai==null) {return true;} // Se avô não existe, acabou
-		 		  //Se não, Precisaremos juntar o(s) tio(s) na página do vô (não são folhas! cuidado com esq e dir)
+		 		  //Se não, Precisaremos juntar o(s) tio(s) na página do vô 
+		 		  //(não são folhas! cuidado com esq e dir)
 		 		  for (int j=0;PagAtual.pai.pai.nodos[j]!=null;j++) //percorrendo a página avô
 	 		  		{Nodo avo_nodo=PagAtual.pai.pai.nodos[j];
 		 			 if (avo_nodo.esq!=null && (avo_nodo.esq!=PagAtual.pai))
@@ -220,7 +227,8 @@ private boolean removerCaso3(Pagina PagAtual, Nodo NodoAtual, int i,int chave)
 	 		  			PagAtual.pai.pai.nodos[j].esq=PagAtual.pai.pai.nodos[inserido].dir;
 	 		  			quebrarVetor(PagAtual.pai.pai);
 	 		  			 }
-	 		  		 if (PagAtual.pai.pai.nodos[j].dir!=null && (PagAtual.pai.pai.nodos[j].dir!=PagAtual.pai))
+	 		  		 if (PagAtual.pai.pai.nodos[j].dir!=null && 
+	 		  				 (PagAtual.pai.pai.nodos[j].dir!=PagAtual.pai))
 	 		  		 	{int primeiro_inserido=0;
 	 		  			 for (int l=0;avo_nodo.dir.nodos[l]!=null;l++)
 	 		  				 {int inserido=PagAtual.pai.pai.inserir(avo_nodo.dir.nodos[l].chave);
